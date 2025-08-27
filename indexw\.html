@@ -1,0 +1,356 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Vehicle Card Generator (86mm × 54mm)</title>
+  <style>
+    :root{
+      --card-w: 86mm;
+      --card-h: 54mm;
+      --pad: 6mm;
+      --gap: 8px;
+      --border: #111;
+      --muted: #444;
+      --accent: #0b5cff;
+    }
+
+    *{box-sizing:border-box}
+    body{font-family:system-ui,-apple-system,Segoe UI,Roboto,Ubuntu,Helvetica,Arial,sans-serif;margin:0;background:#0b0f14;color:#0f172a}
+
+    header{position:sticky;top:0;background:#0b0f14;border-bottom:1px solid #1f2937;z-index:5}
+    header .wrap{max-width:1100px;margin:auto;padding:14px 16px;display:flex;gap:12px;align-items:center}
+    header h1{font-size:18px;color:#e5e7eb;margin:0;font-weight:600}
+
+    main{max-width:1100px;margin:0 auto;padding:16px;display:grid;grid-template-columns:360px 1fr;gap:16px}
+    @media (max-width:960px){main{grid-template-columns:1fr}}
+
+    /* Form */
+    .panel{background:#0f172a;border:1px solid #1f2937;border-radius:14px;box-shadow:0 10px 30px rgba(0,0,0,.35)}
+    .panel h2{margin:0;padding:14px 16px;border-bottom:1px solid #1f2937;color:#e5e7eb;font-size:16px}
+    form{padding:14px 14px 6px 14px;display:grid;grid-template-columns:1fr;gap:10px}
+    .row{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+    .row3{display:grid;grid-template-columns:repeat(3,1fr);gap:10px}
+    label{display:block;font-size:12px;color:#9ca3af;margin-bottom:4px}
+    input, textarea, select{width:100%;padding:10px 12px;border:1px solid #334155;background:#0b1220;border-radius:10px;color:#e5e7eb}
+    textarea{resize:vertical;min-height:64px}
+    .hint{font-size:11px;color:#94a3b8}
+
+    .actions{display:flex;gap:8px;padding:10px 14px 16px 14px}
+    button{appearance:none;border:none;background:var(--accent);color:white;border-radius:12px;padding:10px 14px;font-weight:600;cursor:pointer}
+    button.sec{background:#111827;color:#e5e7eb;border:1px solid #374151}
+
+    /* Canvas */
+    .stage{display:grid;grid-template-columns:repeat(2, var(--card-w));gap:16px;justify-content:start;overflow:auto;padding:16px}
+    .card{width:var(--card-w);height:var(--card-h);background:#fff;border:1px solid var(--border);border-radius:8px;position:relative;color:#111;overflow:hidden}
+    .card .inner{padding:var(--pad);font-size:11px;line-height:1.25}
+    .muted{color:#444}
+    .right{position:absolute;top:var(--pad);right:var(--pad)}
+    .big{font-size:16px;font-weight:700}
+    .grid{display:grid;grid-template-columns:110px 1fr;gap:4px 8px;margin-top:6px}
+    .hdr{display:flex;justify-content:space-between;align-items:flex-start;gap:8px}
+    .vdate{position:absolute;right:0;top:0;height:100%;writing-mode:vertical-rl;transform:rotate(180deg);font-size:11px;color:#222;letter-spacing:.5px;padding:10px 6px;background:transparent}
+    .qr{width:32mm;height:32mm;border:1px solid #bbb;display:flex;align-items:center;justify-content:center;overflow:hidden}
+    .qr img{width:100%;height:100%;object-fit:cover}
+    .sign{height:16mm}
+    .sign img{height:100%;object-fit:contain}
+
+    /* Back layout specifics */
+    .table{display:grid;grid-template-columns:1fr 1fr 1fr 1fr;gap:4px;margin-top:6px}
+    .table div{border:1px solid #e5e7eb;padding:4px 6px;font-size:10px}
+
+    /* Print styles */
+    @media print{
+      header, .panel{display:none !important}
+      body{background:white}
+      .stage{gap:0;justify-content:center}
+      .card{margin:0;page-break-after:always;border:0}
+      @page{size: 86mm 54mm; margin:0}
+    }
+  </style>
+</head>
+<body>
+  <header>
+    <div class="wrap">
+      <h1>Vehicle Smart Card – Form ➜ Front & Back (86mm × 54mm)</h1>
+      <div class="hint">Fill the form, upload QR & signature, then Generate ➜ Print.</div>
+    </div>
+  </header>
+
+  <main>
+    <!-- Form Panel -->
+    <section class="panel" aria-label="Input form">
+      <h2>Card Details</h2>
+      <form id="cardForm">
+        <div class="row">
+          <div>
+            <label>Registration No.</label>
+            <input name="regno" value="TN50BW7333" required />
+          </div>
+          <div>
+            <label>Owner Serial / No.</label>
+            <input name="ownerSerial" value="1" />
+          </div>
+        </div>
+        <div class="row">
+          <div>
+            <label>Issue Date (Front)</label>
+            <input name="issueDate" value="27-12-2023" />
+          </div>
+          <div>
+            <label>Valid Upto (Front)</label>
+            <input name="validUpto" value="26-12-2038" />
+          </div>
+        </div>
+        <div class="row">
+          <div>
+            <label>Engine No.</label>
+            <input name="engineNo" value="G3N4E0602027" />
+          </div>
+          <div>
+            <label>Chassis (VIN)</label>
+            <input name="chassisNo" value="ME1RG67LBP0014950" />
+          </div>
+        </div>
+        <div class="row">
+          <div>
+            <label>Owner Name</label>
+            <input name="ownerName" value="TAMILLAZHAKAN S" />
+          </div>
+          <div>
+            <label>Father/Guardian</label>
+            <input name="guardian" value="SANMUGAM" />
+          </div>
+        </div>
+        <div class="row">
+          <div>
+            <label>Fuel Type</label>
+            <input name="fuel" value="PETROL" />
+          </div>
+          <div>
+            <label>Emission Norms</label>
+            <input name="emission" value="BHARAT STAGE VI" />
+          </div>
+        </div>
+        <div>
+          <label>Address (will wrap automatically)</label>
+          <textarea name="address">NO 348, NORTH STREET, KOVILVENNI, KOVILVENNI BAZAAR, THIRUVARUR, Tamil Nadu 614403</textarea>
+        </div>
+        <div>
+          <label>Vertical Printed Date (Right edge)</label>
+          <input name="verticalDate" value="09-01-2024" />
+        </div>
+        <hr style="border-color:#1f2937;border-width:1px 0 0;margin:4px 0 8px" />
+        <div class="row">
+          <div>
+            <label>Vehicle Class</label>
+            <input name="vclass" value="M-Cycle/Scooter" />
+          </div>
+          <div>
+            <label>Manufacturer</label>
+            <input name="maker" value="INDIA YAMAHA MOTOR PVT LTD" />
+          </div>
+        </div>
+        <div class="row">
+          <div>
+            <label>Model</label>
+            <input name="model" value="YAMAHA R15" />
+          </div>
+          <div>
+            <label>Colour</label>
+            <input name="colour" value="DEEP PURPLISH BLUE" />
+          </div>
+        </div>
+        <div class="row">
+          <div>
+            <label>Seating Description</label>
+            <input name="seatingDesc" value="SOLO WITH PILLON" />
+          </div>
+          <div>
+            <label>Seating Capacity</label>
+            <input name="seatingCap" value="2" />
+          </div>
+        </div>
+        <div class="row3">
+          <div>
+            <label>Month/Year of Mfg.</label>
+            <input name="mfg" value="11/2023" />
+          </div>
+          <div>
+            <label>Engine Capacity (cc)</label>
+            <input name="cc" value="155.0" />
+          </div>
+          <div>
+            <label>Power (kW)</label>
+            <input name="power" value="10.7" />
+          </div>
+        </div>
+        <div class="row">
+          <div>
+            <label>Wheelbase (mm)</label>
+            <input name="wheelbase" value="1325" />
+          </div>
+          <div>
+            <label>Financier</label>
+            <input name="financier" value="L&T FINANCE HOLDINGS LTD" />
+          </div>
+        </div>
+        <div class="row">
+          <div>
+            <label>Registering Authority (Bottom Right)</label>
+            <input name="rto" value="TN50 MANNARGUDI UO" />
+          </div>
+          <div>
+            <label>Signature Caption (under sign)</label>
+            <input name="signCaption" value="" />
+          </div>
+        </div>
+        <div class="row">
+          <div>
+            <label>Upload QR (square)</label>
+            <input type="file" accept="image/*" id="qrInput" />
+          </div>
+          <div>
+            <label>Upload Signature (transparent PNG preferred)</label>
+            <input type="file" accept="image/*" id="signInput" />
+          </div>
+        </div>
+        <div class="actions">
+          <button type="button" id="btnGenerate">Generate / Update Cards</button>
+          <button type="button" class="sec" onclick="window.print()">Print (Front & Back)</button>
+        </div>
+      </form>
+    </section>
+
+    <!-- Preview Panel -->
+    <section class="panel" aria-label="Preview">
+      <h2>Live Preview (Front & Back)</h2>
+      <div class="stage">
+        <!-- FRONT -->
+        <div class="card" id="front">
+          <div class="vdate" id="frontVDate">09-01-2024</div>
+          <div class="inner">
+            <div class="hdr">
+              <div class="big" id="frontReg">TN50BW7333</div>
+              <div class="right">
+                <div><span class="muted">Issue</span> <strong id="frontIssue">27-12-2023</strong></div>
+                <div><span class="muted">Valid</span> <strong id="frontValid">26-12-2038</strong></div>
+              </div>
+            </div>
+
+            <div class="grid" style="margin-top:8px">
+              <div class="muted">VIN (Chassis)</div><div id="frontChassis">ME1RG67LBP0014950</div>
+              <div class="muted">Engine No.</div><div id="frontEngine">G3N4E0602027</div>
+              <div class="muted">Owner Name</div><div id="frontOwner">TAMILLAZHAKAN S</div>
+              <div class="muted">Father/Guardian</div><div id="frontGuardian">SANMUGAM</div>
+              <div class="muted">Fuel</div><div id="frontFuel">PETROL</div>
+              <div class="muted">Emission</div><div id="frontEmission">BHARAT STAGE VI</div>
+            </div>
+
+            <div style="margin-top:6px">
+              <div class="muted">Address</div>
+              <div id="frontAddr">NO 348, NORTH STREET, KOVILVENNI, KOVILVENNI BAZAAR, THIRUVARUR, Tamil Nadu 614403</div>
+            </div>
+          </div>
+        </div>
+
+        <!-- BACK -->
+        <div class="card" id="back">
+          <div class="inner">
+            <div class="hdr">
+              <div>
+                <div id="backClass" style="font-weight:700">M-Cycle/Scooter</div>
+                <div id="backMaker" class="muted">INDIA YAMAHA MOTOR PVT LTD</div>
+              </div>
+              <div class="qr" id="qrBox"><span class="muted">QR</span></div>
+            </div>
+
+            <div class="grid" style="margin-top:6px">
+              <div class="muted">Model</div><div id="backModel">YAMAHA R15</div>
+              <div class="muted">Colour</div><div id="backColour">DEEP PURPLISH BLUE</div>
+              <div class="muted">Seating</div><div id="backSeatDesc">SOLO WITH PILLON</div>
+              <div class="muted">Capacity</div><div id="backSeatCap">2</div>
+              <div class="muted">Mfr. Month/Year</div><div id="backMfg">11/2023</div>
+              <div class="muted">Engine cc</div><div id="backCc">155.0</div>
+              <div class="muted">Power (kW)</div><div id="backPower">10.7</div>
+              <div class="muted">Wheelbase (mm)</div><div id="backWheel">1325</div>
+            </div>
+
+            <div style="display:flex;justify-content:space-between;align-items:flex-end;margin-top:8px">
+              <div>
+                <div class="muted">Financier</div>
+                <div id="backFin">L&T FINANCE HOLDINGS LTD</div>
+              </div>
+              <div class="sign" id="signBox"></div>
+            </div>
+
+            <div style="display:flex;justify-content:flex-end;margin-top:6px">
+              <div id="backRTO" style="font-size:11px">TN50 MANNARGUDI UO</div>
+            </div>
+          </div>
+        </div>
+      </div>
+      <div class="hint" style="padding:8px 14px 14px">Tip: In the print dialog, set scale to 100% and margins to None for exact size.</div>
+    </section>
+  </main>
+
+  <script>
+    const $ = (sel, root=document) => root.querySelector(sel);
+
+    function fileToDataURL(file){
+      return new Promise((res, rej)=>{
+        const r=new FileReader();
+        r.onload=()=>res(r.result); r.onerror=rej; r.readAsDataURL(file);
+      });
+    }
+
+    async function handleGenerate(){
+      const f = document.forms.cardForm;
+
+      // FRONT
+      $('#frontReg').textContent = f.regno.value.trim();
+      $('#frontIssue').textContent = f.issueDate.value.trim();
+      $('#frontValid').textContent = f.validUpto.value.trim();
+      $('#frontChassis').textContent = f.chassisNo.value.trim();
+      $('#frontEngine').textContent = f.engineNo.value.trim();
+      $('#frontOwner').textContent = f.ownerName.value.trim();
+      $('#frontGuardian').textContent = f.guardian.value.trim();
+      $('#frontFuel').textContent = f.fuel.value.trim();
+      $('#frontEmission').textContent = f.emission.value.trim();
+      $('#frontAddr').textContent = f.address.value.trim();
+      $('#frontVDate').textContent = f.verticalDate.value.trim();
+
+      // BACK
+      $('#backClass').textContent = f.vclass.value.trim();
+      $('#backMaker').textContent = f.maker.value.trim();
+      $('#backModel').textContent = f.model.value.trim();
+      $('#backColour').textContent = f.colour.value.trim();
+      $('#backSeatDesc').textContent = f.seatingDesc.value.trim();
+      $('#backSeatCap').textContent = f.seatingCap.value.trim();
+      $('#backMfg').textContent = f.mfg.value.trim();
+      $('#backCc').textContent = f.cc.value.trim();
+      $('#backPower').textContent = f.power.value.trim();
+      $('#backWheel').textContent = f.wheelbase.value.trim();
+      $('#backFin').textContent = f.financier.value.trim();
+      $('#backRTO').textContent = f.rto.value.trim();
+
+      // Files
+      const qrFile = $('#qrInput').files[0];
+      if(qrFile){
+        const url = await fileToDataURL(qrFile);
+        $('#qrBox').innerHTML = `<img alt="QR" src="${url}"/>`;
+      }
+      const signFile = $('#signInput').files[0];
+      if(signFile){
+        const url = await fileToDataURL(signFile);
+        $('#signBox').innerHTML = `<img alt="Signature" src="${url}"/>`;
+      }
+    }
+
+    $('#btnGenerate').addEventListener('click', handleGenerate);
+
+    // Immediately populate preview with defaults on load
+    window.addEventListener('DOMContentLoaded', handleGenerate);
+  </script>
+</body>
+</html>

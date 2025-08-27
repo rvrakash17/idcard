@@ -1,0 +1,749 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Vehicle Card Generator (86mm × 54mm)</title>
+    <style>
+        :root {
+            --card-w: 326px;
+            --card-h: 204px;
+            --border: #111;
+            --muted: #444;
+            --accent: #0b5cff;
+        }
+
+        * {
+            box-sizing: border-box
+        }
+
+        body {
+            font-family: Arial;
+            margin: 0;
+            background: #0b0f14;
+            color: #0f172a
+        }
+
+        header {
+            position: sticky;
+            top: 0;
+            background: #0b0f14;
+            border-bottom: 1px solid #1f2937;
+            z-index: 5
+        }
+
+        header .wrap {
+            max-width: 1100px;
+            margin: auto;
+            padding: 14px 16px;
+            display: flex;
+            gap: 12px;
+            align-items: center
+        }
+
+        header h1 {
+            font-size: 18px;
+            color: #e5e7eb;
+            margin: 0;
+            font-weight: 600
+        }
+
+        main {
+            margin: 0 auto;
+            padding: 16px;
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 16px
+        }
+
+        @media (max-width:960px) {
+            main {
+                grid-template-columns: 1fr
+            }
+        }
+
+        .card-container {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 20px;
+        }
+
+        .card-section {
+            padding: 5px;
+        }
+
+        .form-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 10px;
+            margin-bottom: 10px;
+        }
+
+        .panel {
+            background: #0f172a;
+            border: 1px solid #1f2937;
+            border-radius: 14px;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, .35)
+        }
+
+        .panel h2 {
+            margin: 0;
+            padding: 14px 16px;
+            border-bottom: 1px solid #1f2937;
+            color: #e5e7eb;
+            font-size: 16px
+        }
+
+        .panel h6 {
+            margin: 0;
+            color: #e5e7eb;
+            font-size: 10px
+        }
+
+        form {
+            padding: 14px 14px 6px 14px;
+            display: grid;
+            grid-template-columns: 1fr;
+            gap: 10px
+        }
+
+        label {
+            display: block;
+            font-size: 12px;
+            color: #9ca3af;
+            margin-bottom: 4px
+        }
+
+        input,
+        textarea,
+        select {
+            width: 100%;
+            padding: 10px 12px;
+            border: 1px solid #334155;
+            background: #0b1220;
+            border-radius: 10px;
+            color: #e5e7eb
+        }
+
+        textarea {
+            resize: vertical;
+            min-height: 64px
+        }
+
+        .hint {
+            font-size: 11px;
+            color: #94a3b8
+        }
+
+        .actions {
+            display: flex;
+            justify-content: center;
+            gap: 8px;
+            padding: 10px 14px 16px 14px
+        }
+
+        button {
+            appearance: none;
+            border: none;
+            background: var(--accent);
+            color: white;
+            border-radius: 12px;
+            padding: 10px 14px;
+            font-weight: 600;
+            cursor: pointer
+        }
+
+        button.sec {
+            background: #111827;
+            color: #e5e7eb;
+            border: 1px solid #374151
+        }
+
+
+
+        .stage {
+            display: grid;
+            grid-template-columns: repeat(2, var(--card-w));
+            gap: 16px;
+            justify-content: start;
+            overflow: auto;
+            padding: 16px
+        }
+
+        .card {
+            width: var(--card-w);
+            height: var(--card-h);
+            background: #fff;
+            position: relative;
+            color: #111;
+            overflow: hidden
+        }
+
+        #qrBox img {
+            width: 62px;
+            height: 62px;
+            object-fit: cover;
+        }
+
+        #signBox img {
+            width: 64px;
+            height: 16px;
+            object-fit: contain;
+        }
+
+        @media print {
+
+            header,
+            .panel[aria-label="Input form"],
+            .panel[aria-label="Preview"] h2,
+            .panel[aria-label="Preview"] .hint {
+                display: none !important;
+            }
+
+            body {
+                background: white;
+            }
+
+            main,
+            .stage {
+                margin: 0 !important;
+                padding: 0 !important;
+                grid-template-columns: 1fr !important;
+                overflow: visible !important;
+                width: 100% !important;
+            }
+
+            .card {
+                width: 86mm !important;
+                height: 54mm !important;
+                margin: 0 !important;
+                padding: 0 !important;
+                border: none !important;
+                border-radius: 0 !important;
+                box-shadow: none !important;
+                page-break-after: always;
+                background: #fff !important;
+            }
+
+            @page {
+                size: var(--card-w) var(--card-h);
+                margin: 0;
+            }
+        }
+
+        @media print {
+            .stage {
+                padding: 0 !important;
+                gap: 0 !important;
+                display: block !important;
+            }
+        }
+    </style>
+
+</head>
+
+<body>
+    <header>
+        <div class="wrap">
+            <h1>Vehicle Smart Card – Form ➜ Front & Back (86mm × 54mm)</h1>
+            <div class="hint">Fill the form, upload QR & signature, then Generate ➜ Print.</div>
+        </div>
+    </header>
+    <main>
+        <section class="panel" aria-label="Input form">
+            <h2>Card Details</h2>
+            <form id="cardForm">
+                <div class="card-container">
+                    <div class="card-section">
+                        <h6>Front Side Card</h6>
+                        <div class="form-grid">
+                            <div>
+                                <label>Fuel</label>
+                                <input name="fuel" value="DIESEL" />
+                            </div>
+                            <div>
+                                <label>Emission Norms</label>
+                                <input name="emissionNorms" value="Not Available" />
+                            </div>
+                            <div>
+                                <label>Regn. Number</label>
+                                <input name="registerNo" value="TN91Y5078" required />
+                            </div>
+                            <div>
+                                <label>Date of Regn.</label>
+                                <input name="registerDate" value="17-11-2008" />
+                            </div>
+                            <div>
+                                <label>Regn. Validity</label>
+                                <input name="validDate" value="16-11-2028" />
+                            </div>
+                            <div>
+                                <label>Chassis Number</label>
+                                <input name="chassisNo" value="MAJBXXMRJB8Y40052" />
+                            </div>
+                            <div>
+                                <label>Owner Serial / No.</label>
+                                <input name="ownerSerial" value="3" />
+                            </div>
+                            <div>
+                                <label>Engine/Motor Number</label>
+                                <input name="engineNo" value="8Y40052" />
+                            </div>
+                            <div>
+                                <label>Owner Name</label>
+                                <input name="ownerName" value="VIJAYAN V" />
+                            </div>
+                            <div>
+                                <label>Card Issue Date</label>
+                                <input name="cardIssueDate" value="07-11-2023" />
+                            </div>
+                        </div>
+                        <div>
+                            <label>Son/Wife/Daughter of(In case of Individual Owner)</label>
+                            <input name="guardian" value="VELAYUDHAM" />
+                        </div>
+                        <div>
+                            <label>Address</label>
+                            <textarea
+                                name="address">NO 348, NORTH STREET, KOVILVENNI, KOVILVENNI BAZAAR, THIRUVARUR, Tamil Nadu 614403</textarea>
+                        </div>
+                        <div>
+                            <label>Upload QR (square)</label>
+                            <input type="file" accept="image/*" id="qrInput" />
+                        </div>
+                        <div>
+                            <label>Upload Signature (transparent PNG preferred)</label>
+                            <input type="file" accept="image/*" id="signInput" />
+                        </div>
+                    </div>
+                    <div class="card-section">
+                        <h6>Back Side Card</h6>
+                        <div class="form-grid">
+                            <div>
+                                <label>Month-Year of Mfg.</label>
+                                <input name="manufactureDate" value="04/2023" />
+                            </div>
+                            <div>
+                                <label>Number of Cylinders</label>
+                                <input name="cylinderCount" value="1" />
+                            </div>
+                            <div>
+                                <label>Number of Axle</label>
+                                <input name="axleCount" value="" />
+                            </div>
+                            <div>
+                                <label>Vehicle Class</label>
+                                <input name="vehicleClass" value="M-Cycle/Scooter(2WN)" />
+                            </div>
+                            <div>
+                                <label>Make's Name</label>
+                                <input name="makesName" value="BAJAJ AUTO LTD" />
+                            </div>
+                            <div>
+                                <label>Model Name</label>
+                                <input name="modelName" value="PULSAR NS 200" />
+                            </div>
+                            <div>
+                                <label>Colour</label>
+                                <input name="colour" value="PEARL METALLIC WHITE" />
+                            </div>
+                            <div>
+                                <label>BodyType</label>
+                                <input name="bodyType" value="SOLO WITH PILLION" />
+                            </div>
+                            <div>
+                                <label>Seating(in all)</label>
+                                <input name="seatingAll" value="2" />
+                            </div>
+                            <div>
+                                <label>Standing</label>
+                                <input name="standing" value="0" />
+                            </div>
+                            <div>
+                                <label>Sleeper Capacity</label>
+                                <input name="sleeperCapacity" value="0" />
+                            </div>
+                            <div>
+                                <label>Unladen</label>
+                                <input name="unLaden" value="158" />
+                            </div>
+                            <div>
+                                <label>Laden</label>
+                                <input name="laden" value="308" />
+                            </div>
+                            <div>
+                                <label>Gross Combination Weight(kg)</label>
+                                <input name="grossCombinationWeight" value="0" />
+                            </div>
+                            <div>
+                                <label>Cubic Capacity</label>
+                                <input name="cubicCapacity" value="199" />
+                            </div>
+                            <div>
+                                <label>Horse Power (BPH/Kw)</label>
+                                <input name="horsePower" value="10.7" />
+                            </div>
+                            <div>
+                                <label>Wheel Base(mm)</label>
+                                <input name="wheelBase" value="1363" />
+                            </div>
+                            <div>
+                                <label>Financer Name</label>
+                                <input name="financerName" value="BALAJ FINANCE LTD" />
+                            </div>
+                            <div>
+                                <label>Registration Authority</label>
+                                <input name="registerationAuthority" value="TN61 ARIYALUR RTO" />
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div class="actions">
+                    <button type="button" id="btnGenerate">Generate Cards</button>
+                    <button type="button" class="sec" onclick="window.print()">Print (Front & Back)</button>
+                </div>
+            </form>
+        </section>
+        <section class="panel" aria-label="Preview">
+            <h2>Live Preview (Front & Back)</h2>
+            <div class="stage">
+                <div class="card" id="front">
+                    <div id="fuel" style="
+                        position: absolute;
+                        font-size: 6px;
+                        font-weight: bold;
+                        margin-top: 158px;
+                        margin-left: 7px;
+                        ">
+                    </div>
+                    <div id="emissionNorms" style="
+                        position: absolute;
+                        font-size: 6px;
+                        font-weight: bold;
+                        margin-top: 179px;
+                        margin-left: 7px;
+                        ">
+                    </div>
+                    <div id="registerFrontNo" style="
+                        position: absolute;
+                        font-size: 6px;
+                        font-weight: bold;
+                        margin-top: 53px;
+                        margin-left: 87px;
+                        ">
+                    </div>
+                    <div id="registerDate" style="
+                        position: absolute;
+                        font-size: 6px;
+                        font-weight: bold;
+                        margin-top: 53px;
+                        margin-left: 178px;
+                       letter-spacing: 0.3em;
+                        ">
+                    </div>
+                    <div id="validDate" style="
+                        position: absolute;
+                        font-size: 6px;
+                        font-weight: bold;
+                        margin-top: 53px;
+                        margin-left: 259px;
+                        letter-spacing: 0.3em;
+                        ">
+                    </div>
+                    <div id="chassisNo" style="
+                        position: absolute;
+                        font-size: 6px;
+                        font-weight: bold;
+                        margin-top: 76px;
+                        margin-left: 87px;
+                        ">
+                    </div>
+                    <div id="ownerSerial" style="
+                        position: absolute;
+                        font-size: 6px;
+                        font-weight: bold;
+                        margin-top: 76px;
+                        margin-left: 290px;
+                        ">
+                    </div>
+                    <div id="engineNo" style="
+                        position: absolute;
+                        font-size: 6px;
+                        font-weight: bold;
+                        margin-top: 100px;
+                        margin-left: 87px;
+                        ">
+                    </div>
+                    <div id="ownerName" style="
+                        position: absolute;
+                        font-size: 6px;
+                        font-weight: bold;
+                        margin-top: 126px;
+                        margin-left: 87px;
+                        ">
+                    </div>
+                    <div id="guardian" style="
+                        position: absolute;
+                        font-size: 6px;
+                        font-weight: bold;
+                        margin-top: 152px;
+                        margin-left: 87px;
+                        ">
+                    </div>
+                    <div id="address" style="
+                        position: absolute;
+                        font-size: 6px;
+                        font-weight: bold;
+                        margin-top: 175px;
+                        margin-left: 87px;
+                        width: 120px;        
+                        white-space: normal;  
+                        word-wrap: break-word;
+                    ">
+                    </div>
+                    <div id="cardIssueDate" style="
+                        position: absolute;
+                        font-size: 6px;
+                        font-weight: bold;
+                        margin-left: 314px;
+                        margin-top: 55px;
+                        writing-mode: sideways-lr; 
+                        letter-spacing: 0.3em;
+                        ">
+                    </div>
+                </div>
+                <div class="card" id="back">
+                    <div id="vehicleClass" style="
+                        position: absolute;
+                        font-size: 6px;
+                        font-weight: bold;
+                        margin-top: 22px;
+                        margin-left: 145px;
+                        ">
+                    </div>
+                    <div id="registerBackNo" style="
+                        position: absolute;
+                        font-size: 6px;
+                        font-weight: bold;
+                        margin-left: 17px; 
+                        margin-top: 48px;">
+                    </div>
+                    <div id="qrBox" style="
+                        position: absolute;
+                        margin-left: 17px;
+                        margin-top: 59px;">
+                    </div>
+                    <div id="manufactureDate" style="
+                        position: absolute;
+                        font-size: 6px;
+                        font-weight: bold;
+                        margin-left: 17px; 
+                        margin-top: 136px;">
+                    </div>
+                    <div id="cylinderCount" style="
+                        position: absolute;
+                        font-size: 6px;
+                        font-weight: bold;
+                        margin-left: 17px; 
+                        margin-top: 154px;">
+                    </div>
+                    <div id="axleCount" style="
+                        position: absolute;
+                        font-size: 6px;
+                        font-weight: bold;
+                        margin-left: 17px; 
+                        margin-top: 172px;">
+                    </div>
+                    <div id="makesName" style="
+                        position: absolute;
+                        font-size: 6px;
+                        font-weight: bold;
+                        margin-left: 92px; 
+                        margin-top: 44px;">
+                    </div>
+                    <div id="modelName" style="
+                        position: absolute;
+                        font-size: 6px;
+                        font-weight: bold;
+                        margin-left: 92px; 
+                        margin-top: 63px;">
+                    </div>
+                    <div id="colour" style="
+                        position: absolute;
+                        font-size: 6px;
+                        font-weight: bold;
+                        margin-left: 92px; 
+                        margin-top: 80px;">
+                    </div>
+                    <div id="bodyType" style="
+                        position: absolute;
+                        font-size: 6px;
+                        font-weight: bold;
+                        margin-left: 92px; 
+                        margin-top: 99px;">
+                    </div>
+                    <div id="seatingAll" style="
+                        position: absolute;
+                        font-size: 6px;
+                        font-weight: bold;
+                        margin-left: 92px; 
+                        margin-top: 117px;">
+                    </div>
+                    <div id="standing" style="
+                        position: absolute;
+                        font-size: 6px;
+                        font-weight: bold;
+                        margin-left: 140px; 
+                        margin-top: 117px;">
+                    </div>
+                    <div id="sleeperCapacity" style="
+                        position: absolute;
+                        font-size: 6px;
+                        font-weight: bold;
+                        margin-left: 170px; 
+                        margin-top: 117px;">
+                    </div>
+                    <div id="unLaden" style="
+                        position: absolute;
+                        font-size: 6px;
+                        font-weight: bold;
+                        margin-left: 92px; 
+                        margin-top: 137px;">
+                    </div>
+                    <div id="laden" style="
+                        position: absolute;
+                        font-size: 6px;
+                        font-weight: bold;
+                        margin-left: 123px; 
+                        margin-top: 137px;">
+                    </div>
+                    <div id="grossCombinationWeight" style="
+                        position: absolute;
+                        font-size: 6px;
+                        font-weight: bold;
+                        margin-left: 153px; 
+                        margin-top: 137px;">
+                    </div>
+                    <div id="cubicCapacity" style="
+                        position: absolute;
+                        font-size: 6px;
+                        font-weight: bold;
+                        margin-left: 92px; 
+                        margin-top: 154px;">
+                    </div>
+                    <div id="horsePower" style="
+                        position: absolute;
+                        font-size: 6px;
+                        font-weight: bold;
+                        margin-left: 149px; 
+                        margin-top: 154px;">
+                    </div>
+                    <div id="wheelBase" style="
+                        position: absolute;
+                        font-size: 6px;
+                        font-weight: bold;
+                        margin-left: 224px; 
+                        margin-top: 154px;">
+                    </div>
+                    <div id="financerName" style="
+                        position: absolute;
+                        font-size: 6px;
+                        font-weight: bold;
+                        margin-left: 92px; 
+                        margin-top: 173px;">
+                    </div>
+                    <div id="signBox" style="
+                        position: absolute;
+                        margin-left: 233px; 
+                        margin-top: 165px;">
+                    </div>
+                    <div id="registerationAuthority" style="
+                        position: absolute;
+                        font-size: 6px;
+                        font-weight: bold;
+                        margin-left: 235px; 
+                        margin-top: 192px;">
+                    </div>
+                </div>
+            </div>
+            <div class="hint" style="padding:8px 14px 14px">Tip: In the print dialog, set scale to 100% and margins
+                to
+                None for exact size.</div>
+        </section>
+    </main>
+
+    <script>
+        const $ = (sel, root = document) => root.querySelector(sel);
+
+        async function handleGenerate() {
+            const f = document.forms.cardForm;
+
+
+            // FRONT
+            $('#registerFrontNo').textContent = f.registerNo.value.trim();
+            $('#fuel').textContent = f.fuel.value.trim();
+            $('#emissionNorms').textContent = f.emissionNorms.value.trim();
+            $('#registerDate').textContent = f.registerDate.value.trim();
+            $('#validDate').textContent = f.validDate.value.trim();
+            $('#chassisNo').textContent = f.chassisNo.value.trim();
+            $('#ownerSerial').textContent = f.ownerSerial.value.trim();
+            $('#engineNo').textContent = f.engineNo.value.trim();
+            $('#ownerName').textContent = f.ownerName.value.trim();
+            $('#cardIssueDate').textContent = f.cardIssueDate.value.trim();
+            $('#guardian').textContent = f.guardian.value.trim();
+            $('#address').textContent = f.address.value.trim();
+
+            // BACK
+            $('#registerBackNo').textContent = f.registerNo.value.trim();
+            $('#vehicleClass').textContent = f.vehicleClass.value.trim();
+            $('#manufactureDate').textContent = f.manufactureDate.value.trim();
+            $('#cylinderCount').textContent = f.cylinderCount.value.trim();
+            $('#axleCount').textContent = f.axleCount.value.trim();
+            $('#makesName').textContent = f.makesName.value.trim();
+            $('#modelName').textContent = f.modelName.value.trim();
+            $('#colour').textContent = f.colour.value.trim();
+            $('#bodyType').textContent = f.bodyType.value.trim();
+            $('#seatingAll').textContent = f.seatingAll.value.trim();
+            $('#standing').textContent = f.standing.value.trim();
+            $('#sleeperCapacity').textContent = f.sleeperCapacity.value.trim();
+            $('#unLaden').textContent = f.unLaden.value.trim();
+            $('#laden').textContent = f.laden.value.trim();
+            $('#grossCombinationWeight').textContent = f.grossCombinationWeight.value.trim();
+            $('#cubicCapacity').textContent = f.cubicCapacity.value.trim();
+            $('#horsePower').textContent = f.horsePower.value.trim();
+            $('#wheelBase').textContent = f.wheelBase.value.trim();
+            $('#financerName').textContent = f.financerName.value.trim();
+            $('#registerationAuthority').textContent = f.registerationAuthority.value.trim();
+
+            // Files
+            const qrFile = $('#qrInput').files[0];
+            if (qrFile) {
+                const url = await fileToDataURL(qrFile);
+                $('#qrBox').innerHTML = `<img alt="QR" src="${url}"/>`;
+            } else {
+                $('#qrBox').innerHTML = `<img alt="QR Placeholder" src="qr.webp"/>`;
+            }
+
+            const signFile = $('#signInput').files[0];
+            if (signFile) {
+                const url = await fileToDataURL(signFile);
+                $('#signBox').innerHTML = `<img alt="Signature" src="${url}"/>`;
+            } else {
+                $('#signBox').innerHTML = `<img alt="Signature Placeholder" src="sign.png"/>`;
+            }
+        }
+
+        function fileToDataURL(file) {
+            return new Promise((res, rej) => {
+                const r = new FileReader();
+                r.onload = () => res(r.result); r.onerror = rej; r.readAsDataURL(file);
+            });
+        }
+
+        $('#btnGenerate').addEventListener('click', handleGenerate);
+        window.addEventListener('DOMContentLoaded', handleGenerate);
+    </script>
+</body>
+
+</html>
