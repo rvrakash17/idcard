@@ -155,8 +155,6 @@
             border: 1px solid #374151
         }
 
-
-
         .stage {
             display: grid;
             grid-template-columns: repeat(2, var(--card-w));
@@ -174,55 +172,8 @@
             color: #111;
             overflow: hidden
         }
-
-        @media print {
-
-            header,
-            .panel[aria-label="Input form"],
-            .panel[aria-label="Preview"] h2 {
-                display: none !important;
-            }
-
-            body {
-                background: white;
-            }
-
-            main,
-            .stage {
-                margin: 0 !important;
-                padding: 0 !important;
-                grid-template-columns: 1fr !important;
-                overflow: visible !important;
-                width: 100% !important;
-            }
-
-            .card {
-                width: 86mm !important;
-                height: 54mm !important;
-                margin: 0 !important;
-                padding: 0 !important;
-                border: none !important;
-                border-radius: 0 !important;
-                box-shadow: none !important;
-                page-break-after: always;
-                background: #fff !important;
-            }
-
-            @page {
-                size: var(--card-w) var(--card-h);
-                margin: 0;
-            }
-        }
-
-        @media print {
-            .stage {
-                padding: 0 !important;
-                gap: 0 !important;
-                display: block !important;
-            }
-        }
     </style>
-
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
 </head>
 
 <body>
@@ -311,7 +262,7 @@
                             </div>
                             <div>
                                 <label>Number of Axle</label>
-                                <input name="axleCount" value="" />
+                                <input name="axleCount" value="1" />
                             </div>
                             <div>
                                 <label>Vehicle Class</label>
@@ -385,18 +336,19 @@
                     </div>
                 </div>
                 <div class="actions">
-                    <button type="button" id="btnGenerate">Generate Cards</button>
-                    <button type="button" class="sec" onclick="window.print()">Print (Front & Back)</button>
+                    <button type="button" onclick="handleGenerate()">Generate Cards</button>
+                    <button type="button" class="sec" onclick="downloadPrimaryImages()">Download Primary Card</button>
+                    <button type="button" class="sec" onclick="downloadSecodnaryImages()">Download Secondary Card</button>
                 </div>
             </form>
         </section>
         <section class="panel" aria-label="Preview">
             <h2>Live Preview Primary Card (Front & Back)</h2>
             <div class="stage">
-                <div class="card" id="front">
+                <div class="card" id="pfront">
                     <div id="fuel" style="
                         position: absolute;
-                        font-size: 6px;
+                        font-size: 7px;
                         font-weight: bold;
                         margin-top: 158px;
                         margin-left: 7px;
@@ -404,7 +356,7 @@
                     </div>
                     <div id="emissionNorms" style="
                         position: absolute;
-                        font-size: 6px;
+                        font-size: 7px;
                         font-weight: bold;
                         margin-top: 179px;
                         margin-left: 7px;
@@ -412,7 +364,7 @@
                     </div>
                     <div id="registerFrontNo" style="
                         position: absolute;
-                        font-size: 6px;
+                        font-size: 8px;
                         font-weight: bold;
                         margin-top: 53px;
                         margin-left: 87px;
@@ -420,25 +372,23 @@
                     </div>
                     <div id="registerDate" style="
                         position: absolute;
-                        font-size: 6px;
+                        font-size: 8px;
                         font-weight: bold;
                         margin-top: 53px;
                         margin-left: 178px;
-                       letter-spacing: 0.3em;
                         ">
                     </div>
                     <div id="validDate" style="
                         position: absolute;
-                        font-size: 6px;
+                        font-size: 8px;
                         font-weight: bold;
                         margin-top: 53px;
                         margin-left: 259px;
-                        letter-spacing: 0.3em;
                         ">
                     </div>
                     <div id="chassisNo" style="
                         position: absolute;
-                        font-size: 6px;
+                        font-size: 7px;
                         font-weight: bold;
                         margin-top: 76px;
                         margin-left: 87px;
@@ -446,7 +396,7 @@
                     </div>
                     <div id="ownerSerial" style="
                         position: absolute;
-                        font-size: 6px;
+                        font-size: 7px;
                         font-weight: bold;
                         margin-top: 76px;
                         margin-left: 290px;
@@ -454,7 +404,7 @@
                     </div>
                     <div id="engineNo" style="
                         position: absolute;
-                        font-size: 6px;
+                        font-size: 7px;
                         font-weight: bold;
                         margin-top: 100px;
                         margin-left: 87px;
@@ -462,7 +412,7 @@
                     </div>
                     <div id="ownerName" style="
                         position: absolute;
-                        font-size: 6px;
+                        font-size: 7px;
                         font-weight: bold;
                         margin-top: 126px;
                         margin-left: 87px;
@@ -470,7 +420,7 @@
                     </div>
                     <div id="guardian" style="
                         position: absolute;
-                        font-size: 6px;
+                        font-size: 7px;
                         font-weight: bold;
                         margin-top: 152px;
                         margin-left: 87px;
@@ -478,27 +428,28 @@
                     </div>
                     <div id="address" style="
                         position: absolute;
-                        font-size: 6px;
+                        font-size: 7px;
                         font-weight: bold;
                         margin-top: 175px;
                         margin-left: 87px;
-                        width: 120px;        
+                        width: 150px;        
                         white-space: normal;  
                         word-wrap: break-word;
                     ">
                     </div>
                     <div id="cardIssueDate" style="
                         position: absolute;
-                        font-size: 6px;
+                        font-size: 7px;
                         font-weight: bold;
                         margin-left: 314px;
-                        margin-top: 55px;
-                        writing-mode: sideways-lr; 
-                        letter-spacing: 0.3em;
+                        margin-top: 100px;
+                        transform: rotate(-90deg); 
+                        transform-origin: left top; 
+                        white-space: nowrap;        
                         ">
                     </div>
                 </div>
-                <div class="card" id="back">
+                <div class="card" id="pback">
                     <div id="vehicleClass" style="
                         position: absolute;
                         font-size: 6px;
@@ -655,7 +606,7 @@
             <h2>Live Preview Secondary Card (Front & Back)</h2>
 
             <div class="stage">
-                <div class="card" id="front">
+                <div class="card" id="sfront">
                     <div id="sfuel" style="
                         position: absolute;
                         font-size: 6px;
@@ -737,7 +688,7 @@
                     </div>
                 </div>
 
-                <div class="card" id="back">
+                <div class="card" id="sback">
                     <div id="svehicleClass" style="
                         position: absolute;
                         font-size: 6px;
@@ -841,7 +792,7 @@
                         margin-left: 230px; 
                         margin-top: 167px;">
                     </div>
-                     <div id="sregisterationAuthority" style="
+                    <div id="sregisterationAuthority" style="
                         position: absolute;
                         font-size: 6px;
                         font-weight: bold;
@@ -938,13 +889,13 @@
             $('#scubicCapacity').textContent = f.cubicCapacity.value.trim();
             $('#sbodyType').textContent = f.bodyType.value.trim();
             $('#scylinderCount').textContent = f.cylinderCount.value.trim();
-            
-            $('#sfinalseating').textContent = f.seatingAll.value.trim()+' / '+f.standing.value.trim();
-            
+
+            $('#sfinalseating').textContent = f.seatingAll.value.trim() + ' / ' + f.standing.value.trim();
+
             $('#sfinancerName').textContent = f.financerName.value.trim();
-          
-            $('#sfinalladen').textContent = f.laden.value.trim()+' / '+f.unLaden.value.trim();
-          
+
+            $('#sfinalladen').textContent = f.laden.value.trim() + ' / ' + f.unLaden.value.trim();
+
             $('#stax').textContent = f.tax.value.trim();
             $('#sregisterationAuthority').textContent = f.registerationAuthority.value.trim();
 
@@ -972,8 +923,53 @@
             });
         }
 
-        $('#btnGenerate').addEventListener('click', handleGenerate);
         window.addEventListener('DOMContentLoaded', handleGenerate);
+
+        async function downloadPrimaryImages() {
+            const f = document.forms.cardForm;
+
+            const pfront = document.getElementById("pfront");
+            const pback = document.getElementById("pback");
+
+            // Primary Front Card
+            await html2canvas(pfront, { scale: 3 }).then(canvas => {
+                const link = document.createElement("a");
+                link.download = f.registerNo.value.trim() + "_primary_front_card.png";
+                link.href = canvas.toDataURL("image/png");
+                link.click();
+            });
+
+            // Primary Back Card
+            await html2canvas(pback, { scale: 3 }).then(canvas => {
+                const link = document.createElement("a");
+                link.download = f.registerNo.value.trim() + "_primary_back_card.png";
+                link.href = canvas.toDataURL("image/png");
+                link.click();
+            });
+        }
+
+        async function downloadSecondaryImages() {
+            const f = document.forms.cardForm;
+
+            const sfront = document.getElementById("sfront");
+            const sback = document.getElementById("sback");
+
+            // Secondary Front Card
+            await html2canvas(sfront, { scale: 3 }).then(canvas => {
+                const link = document.createElement("a");
+                link.download = f.registerNo.value.trim() + "_secondary_front_card.png";
+                link.href = canvas.toDataURL("image/png");
+                link.click();
+            });
+
+            // Secondary Back Card
+            await html2canvas(sback, { scale: 3 }).then(canvas => {
+                const link = document.createElement("a");
+                link.download = f.registerNo.value.trim() + "_secondary_back_card.png";
+                link.href = canvas.toDataURL("image/png");
+                link.click();
+            });
+        }
     </script>
 </body>
 
